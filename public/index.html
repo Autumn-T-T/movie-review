@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Movie Finder</title>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#121212;
+      color:white;
+      padding:40px;
+    }
+
+    h1{
+      text-align:center;
+    }
+
+    .search-bar{
+      text-align:center;
+      margin-bottom:30px;
+    }
+
+    input{
+      padding:10px;
+      font-size:16px;
+      width:250px;
+      border-radius:5px;
+      border:none;
+    }
+
+    button{
+      padding:10px 15px;
+      font-size:16px;
+      border:none;
+      border-radius:5px;
+      background:#e50914;
+      color:white;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#b20710;
+    }
+
+    #results{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, 200px);
+      gap:20px;
+      justify-content:center;
+    }
+
+    .movie-card{
+      background:#1e1e1e;
+      border-radius:8px;
+      padding:10px;
+      text-align:center;
+      cursor:pointer;
+      transition: transform 0.2s;
+    }
+
+    .movie-card:hover{
+      transform:scale(1.05);
+    }
+
+    img{
+      width:100%;
+      border-radius:5px;
+    }
+
+    #details{
+      margin-top:40px;
+      background:#1e1e1e;
+      padding:20px;
+      border-radius:8px;
+      max-width:700px;
+      margin-left:auto;
+      margin-right:auto;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🎬 Movie Finder</h1>
+
+<div class="search-bar">
+  <input id="searchInput" placeholder="Search movies..." />
+  <button onclick="searchMovies()">Search</button>
+</div>
+
+<div id="results"></div>
+
+<div id="details"></div>
+
+<script>
+
+async function searchMovies(){
+
+  const title = document.getElementById("searchInput").value
+
+  const response = await fetch(`/api/search?title=${title}`)
+  const data = await response.json()
+
+  const resultsDiv = document.getElementById("results")
+  resultsDiv.innerHTML=""
+
+  if(!data.Search){
+    resultsDiv.innerHTML="No movies found"
+    return
+  }
+
+  data.Search.forEach(movie => {
+
+    const card = document.createElement("div")
+    card.className="movie-card"
+
+    card.innerHTML = `
+      <img src="${movie.Poster}" />
+      <h3>${movie.Title}</h3>
+      <p>${movie.Year}</p>
+    `
+
+    card.onclick = () => getMovieDetails(movie.imdbID)
+
+    resultsDiv.appendChild(card)
+
+  })
+}
+
+async function getMovieDetails(id){
+
+  const response = await fetch(`/api/movies/${id}`)
+  const movie = await response.json()
+
+  const detailsDiv = document.getElementById("details")
+
+  detailsDiv.innerHTML = `
+    <h2>${movie.Title}</h2>
+    <p><strong>Year:</strong> ${movie.Year}</p>
+    <p><strong>Genre:</strong> ${movie.Genre}</p>
+    <p><strong>Director:</strong> ${movie.Director}</p>
+    <p><strong>Plot:</strong> ${movie.Plot}</p>
+    <img src="${movie.Poster}" width="200"/>
+  `
+}
+
+</script>
+
+</body>
+</html>
